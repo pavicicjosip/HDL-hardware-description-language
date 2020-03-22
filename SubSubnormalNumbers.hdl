@@ -1,0 +1,23 @@
+
+CHIP SubSubnormalNumbers
+{
+    IN a[16], b[16]; //a is poz, b is neg
+    OUT out[16];
+
+    PARTS:
+    //If (a_exponent == b_exponent == 00000)
+    TwosComplement12(in[0..9]= b[0..9], in[10]= false, in[11] = false, out= tc0);
+    Add11sign(a[0..9]= a[0..9], a[10]= false, b= tc0, out= o1, bit=b0, sign=s);
+    Or(a= false, b= s, out=out[15]);
+
+    TwosComplement12(in[0..9]= o1, in[10]= b0, in[11]= s, out= o2);
+    MantisaBit(in= o2, out= o3, bit=b1);
+
+    Mux10(a=o1, b=o3, sel=s, out=out[0..9]);
+
+    Or(a= false, b= a[10], out= out[10]);
+    Or(a= false, b= a[11], out= out[11]);
+    Or(a= false, b= a[12], out= out[12]);
+    Or(a= false, b= a[13], out= out[13]);
+    Or(a= false, b= a[14], out= out[14]);    
+}

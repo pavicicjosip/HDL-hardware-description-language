@@ -1,0 +1,12 @@
+//returns the number with the lowest power
+
+CHIP Max
+{
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+    aLTb5Bit(a = a[10..14], b = b[10..14], out = o);
+    Not(in = o, out = o1);
+    Mux16(a = b, b = a, sel = o1, out = out);    
+}

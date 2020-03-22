@@ -1,0 +1,17 @@
+//IEEE754 half precision floating point number
+
+CHIP EQ
+{
+    IN a[16], b[16];
+    OUT out;
+
+    PARTS:
+    aEQb5Bit(a = a[0..4], b = b[0..4], out= o0);
+    aEQb5Bit(a = a[5..9], b= b[5..9], out= o1);
+    aEQb5Bit(a = a[10..14], b= b[10..14], out= o2);
+    XNOR(a= a[15], b= b[15], out= o3);
+    And(a= o0, b= o1, out= p0);
+    And(a= p0, b= o2, out= p2);
+    And(a= p2, b= o3, out= out);
+
+}

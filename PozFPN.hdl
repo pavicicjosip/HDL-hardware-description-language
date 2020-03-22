@@ -1,0 +1,9 @@
+
+CHIP PozFPN
+{
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+    Mux16(a= a, b= b, sel= a[15], out= out);
+}

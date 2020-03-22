@@ -1,0 +1,339 @@
+
+CHIP Normalize
+{
+    IN in[16], sel;
+    OUT out[16];
+
+    PARTS:
+    //if r0 = 1 continue, if r1= 1 -> solution
+    DMux(in=true, sel= sel, a= r0, b=r1);
+
+    DMux32Way(in=r0, sel= in[5..9], o0= t0, o1= t1, o2= t2, o3= t3, o4= t4, o5= t5,
+              o6= t6, o7= t7, o8= t8, o9= t9,o10= t10, o11= t11, o12= t12, o13= t13,
+              o14= t14, o15= t15, o16= t16, o17= t17, o18= t18, o19= t19, o20= t20,
+              o21= t21, o22= t22, o23= t23, o24= t24, o25= t25, o26= t26, o27= t27, 
+              o28= t28, o29= t29, o30= t30, o31= t31);
+
+    DMux32Way(in=t0, sel= in[0..4], o0= t32, o1= t33, o2= t34, o3= t35, o4= t36, o5= t37,
+              o6= t38, o7= t39, o8= t40, o9= t41,o10= t42, o11= t43, o12= t44, o13= t45,
+              o14= t46, o15= t47, o16= t48, o17= t49, o18= t50, o19= t51, o20= t52,
+              o21= t53, o22= t54, o23= t55, o24= t56, o25= t57, o26= t58, o27= t59, 
+              o28= t60, o29= t61, o30= t62, o31= t63);
+
+    //dont shiftLeft -> o0 solution
+    aEQb5Bit(a= in[10..14], b = false, out= p0);
+    Or(a = p0, b = r1, out= p1);
+    Mux16(a= false, b= in, sel=p1, out= o0);
+    //shiftLeft once -> o1 solution
+    Or(a= false, b= t16, out= k0);
+    Or(a= k0, b= t17, out= k1);
+    Or(a= k1, b= t18, out= k2);
+    Or(a= k2, b= t19, out= k3);
+    Or(a= k3, b= t20, out= k4);
+    Or(a= k4, b= t21, out= k5);
+    Or(a= k5, b= t22, out= k6);
+    Or(a= k6, b= t23, out= k7);
+    Or(a= k7, b= t24, out= k8);
+    Or(a= k8, b= t25, out= k9);
+    Or(a= k9, b= t26, out= k10);
+    Or(a= k10, b= t27, out= k11);
+    Or(a= k11, b= t28, out= k12);
+    Or(a= k12, b= t29, out= k13);
+    Or(a= k13, b= t30, out= k14);
+    Or(a= k14, b= t31, out= f0);
+    
+    aGTb5Bit(a= in[10..14], b[0]= true, b[1..4]= false, out= w0);
+    And(a= w0, b= f0, out= q0);
+
+    ShiftLeft(in= in[0..9], out= m0);
+    SubOne5(in= in[10..14], out= e0);
+    Mux16(a= false, b[0..9]= m0, b[10..14]= e0, b[15]= in[15], sel= q0, out = o1);
+
+    //shiftLeft twice -> o2 solution
+    Or(a= false, b= t8, out = k15);
+    Or(a= k15, b= t9, out= k16);
+    Or(a= k16, b= t10, out= k17);
+    Or(a= k17, b= t11, out= k18);
+    Or(a= k18, b= t12, out= k19);
+    Or(a= k19, b= t13, out= k20);
+    Or(a= k20, b= t14, out= k21);
+    Or(a= k21, b= t15, out= f1);
+
+    aGTb5Bit(a= in[10..14], b[0]= false, b[1]= true, b[2..4]= false, out= w1);
+    And(a= w1, b= f1, out= q1);
+
+    ShiftLeft(in= m0, out = m1);
+    SubOne5(in= e0, out= e1);
+    Mux16(a= false, b[0..9]= m1, b[10..14]= e1, b[15]= in[15], sel= q1, out = o2);
+
+    //shiftLeft 3 times -> o3 solution
+    Or(a= false, b= t4, out= k22);
+    Or(a= k22, b= t5, out= k23);
+    Or(a= k23, b= t6, out= k24);
+    Or(a= k24, b= t7, out= f2);
+
+    aGTb5Bit(a= in[10..14], b[0]= true, b[1]= true, b[2..4]= false, out= w2);
+    And(a= w2, b= f2, out= q2);
+
+    ShiftLeft(in= m1, out = m2);
+    SubOne5(in= e1, out= e2);
+    Mux16(a= false, b[0..9]= m2, b[10..14]= e2, b[15]= in[15], sel= q2, out = o3);
+
+    //shiftLeft 4 times -> o4 solution
+    Or(a= false, b= t2, out= k25);
+    Or(a= k25, b= t3, out= f3);
+
+    aGTb5Bit(a= in[10..14],b[0..1]= false, b[2]= true, b[3..4]= false, out= w3);
+    And(a= w3, b= f3, out= q3);
+
+    ShiftLeft(in= m2, out = m3);
+    SubOne5(in= e2, out= e3);
+    Mux16(a= false, b[0..9]= m3, b[10..14]= e3, b[15]= in[15], sel= q3, out = o4);
+
+    //shiftLeft 5 times -> o5 solution
+    aGTb5Bit(a= in[10..14], b[0]= true, b[1]= false, b[2]= true, b[3..4]= false, out= w4);
+    And(a= w4, b= t1, out= q4);
+
+    ShiftLeft(in= m3, out = m4);
+    SubOne5(in= e3, out= e4);
+    Mux16(a= false, b[0..9]= m4, b[10..14]= e4, b[15]= in[15], sel= q4, out = o5);
+
+    //shiftLeft 6 times -> o6 solution
+    Or(a= false, b= t48, out= k26);
+    Or(a= k26, b= t49, out= k27);
+    Or(a= k27, b= t50, out= k28);
+    Or(a= k28, b= t51, out= k29);
+    Or(a= k29, b= t52, out= k30);
+    Or(a= k30, b= t53, out= k31);
+    Or(a= k31, b= t54, out= k32);
+    Or(a= k32, b= t55, out= k33);
+    Or(a= k33, b= t56, out= k34);
+    Or(a= k34, b= t57, out= k35);
+    Or(a= k35, b= t58, out= k36);
+    Or(a= k36, b= t59, out= k37);
+    Or(a= k37, b= t60, out= k38);
+    Or(a= k38, b= t61, out= k39);
+    Or(a= k39, b= t62, out= k40);
+    Or(a= k40, b= t63, out= f4);
+
+    aGTb5Bit(a= in[10..14], b[0]= false, b[1]= true, b[2]= true, b[3..4]= false, out= w5);
+    And(a= w5, b= f4, out= q5);
+
+    ShiftLeft(in= m4, out = m5);
+    SubOne5(in= e4, out= e5);
+    Mux16(a= false, b[0..9]= m5, b[10..14]= e5, b[15]= in[15], sel= q5, out = o6);
+    
+    //shiftLeft 7 times -> o7 solution
+    Or(a= false, b= t40, out = k41);
+    Or(a= k41, b= t41, out= k42);
+    Or(a= k42, b= t42, out= k43);
+    Or(a= k43, b= t43, out= k44);
+    Or(a= k44, b= t44, out= k45);
+    Or(a= k45, b= t45, out= k46);
+    Or(a= k46, b= t46, out= k47);
+    Or(a= k47, b= t47, out= f5);
+
+    aGTb5Bit(a= in[10..14], b[0]= true, b[1]= true, b[2]= true, b[3..4]= false, out= w6);
+    And(a= w6, b= f5, out= q6);
+
+    ShiftLeft(in= m5, out = m6);
+    SubOne5(in= e5, out= e6);
+    Mux16(a= false, b[0..9]= m6, b[10..14]= e6, b[15]= in[15], sel= q6, out = o7);
+
+    //shiftLeft 8 times -> o8 solution
+    Or(a= false, b= t36, out= k48);
+    Or(a= k48, b= t37, out= k49);
+    Or(a= k49, b= t38, out= k50);
+    Or(a= k50, b= t39, out= f6);
+
+    aGTb5Bit(a= in[10..14], b[0..2]= false, b[3]= true, b[4]= false, out= w7);
+    And(a= w7, b= f6, out= q7);
+
+    ShiftLeft(in= m6, out = m7);
+    SubOne5(in= e6, out= e7);
+    Mux16(a= false, b[0..9]= m7, b[10..14]= e7, b[15]= in[15], sel= q7, out = o8);
+
+    //shiftLeft 9 times -> o9 solution
+    Or(a= false, b= t34, out= k51);
+    Or(a= k51, b= t35, out= f7);
+
+    aGTb5Bit(a= in[10..14], b[0]= true, b[1..2]= false, b[3]= true, b[4]= false, out= w8);
+    And(a= w8, b= f7, out= q8);
+
+    ShiftLeft(in= m7, out = m8);
+    SubOne5(in= e7, out= e8);
+    Mux16(a= false, b[0..9]= m8, b[10..14]= e8, b[15]= in[15], sel= q8, out = o9);
+
+    //shiftLeft 10 times -> o10 solution
+    aGTb5Bit(a= in[10..14], b[0]= false, b[1]= true, b[2]= false, b[3]= true, b[4]= false, out= w9);
+    And(a= w9, b= t33, out= q9);
+
+    ShiftLeft(in= m8, out = m9);
+    SubOne5(in= e8, out= e9);
+    Mux16(a= false, b[0..9]= m9, b[10..14]= e9, b[15]= in[15], sel= q9, out = o10);
+
+    //the result is zero (a - b = 0) -> o11 solution
+    Mux16(a= false, b= false, sel= t32, out = o11);
+
+    //00001
+    aEQb5Bit(a= in[10..14], b[0]= true, b[1..4]= false, out= c0);
+    And(a= c0, b= f0, out= g0);
+    Not(in= q0, out= nq0);
+    And(a= nq0, b= g0, out= gg0);
+    
+    Mux16(a= false, b[0..9]= m0, b[10]= true, b[11..14]= false, b[15]= in[15], sel=gg0, out= o12);
+    //00010
+    aEQb5Bit(a= in[10..14], b[0]= false, b[1]= true, b[2..4]= false, out= c1);
+    And(a= c1, b= f1, out= g1);
+    Or(a= q0, b= q1, out= qq1);
+    Not(in= qq1, out= nqq1);
+    And(a= nqq1, b= g1, out= gg1);
+    
+    Mux16(a= false, b[0..9]= m1, b[10]= true, b[11..14]= false, b[15]= in[15], sel=gg1, out= o13);
+    //00011
+    aEQb5Bit(a= in[10..14], b[0]= true, b[1]= true, b[2..4]= false, out= c2);
+    And(a= c2, b= f2, out= g2);
+    Or(a= qq1, b= q2, out= qq2);
+    Not(in= qq2, out= nqq2);
+    And(a= nqq2, b= g2, out= gg2);
+    
+    Mux16(a= false, b[0..9]= m2, b[10]= true, b[11..14]= false, b[15]= in[15], sel=gg2, out= o14);
+    //00100
+    aEQb5Bit(a= in[10..14], b[0..1]= false, b[2]= true, b[3..4]= false, out= c3);
+    And(a= c3, b= f3, out= g3);
+    Or(a= qq2, b= q3, out= qq3);
+    Not(in= qq3, out= nqq3);
+    And(a= nqq3, b= g3, out= gg3);
+    
+    Mux16(a= false, b[0..9]= m3, b[10]= true, b[11..14]= false, b[15]= in[15], sel=gg3, out= o15);
+    //00101
+    aEQb5Bit(a= in[10..14], b[0]= true, b[1]= false, b[2]= true, b[3..4]= false, out= c4);
+    And(a= c4, b= t1, out= g4);
+    Or(a= qq3, b= q4, out= qq4);
+    Not(in= qq4, out= nqq4);
+    And(a= nqq4, b= g4, out= gg4);
+    
+    
+    Mux16(a= false, b[0..9]= m4, b[10]= true, b[11..14]= false, b[15]= in[15], sel=gg4, out= o16);
+    //00110
+    aEQb5Bit(a= in[10..14], b[0]= false, b[1]= true, b[2]= true, b[3..4]= false, out= c5);
+    And(a= c5, b= f4, out= g5);
+    Or(a= qq4, b= q5, out= qq5);
+    Not(in= qq5, out= nqq5);
+    And(a= nqq5, b= g5, out= gg5);
+    
+    Mux16(a= false, b[0..9]= m5, b[10]= true, b[11..14]= false, b[15]= in[15], sel=gg5, out= o17);
+    //00111
+    aEQb5Bit(a= in[10..14], b[0..2]= true, b[3..4]= false, out= c6);
+    And(a= c6, b= f5, out= g6);
+    Or(a= qq5, b= q6, out= qq6);
+    Not(in= qq6, out= nqq6);
+    And(a= nqq6, b= g6, out= gg6);
+    
+    Mux16(a= false, b[0..9]= m6, b[10]= true, b[11..14]= false, b[15]= in[15], sel=gg6, out= o18);
+    //01000
+    aEQb5Bit(a= in[10..14],b[0..2]= false, b[3]= true,  b[4]= false, out= c7);
+    And(a= c7, b= f6, out= g7);
+    Or(a= qq6, b= q7, out= qq7);
+    Not(in= qq7, out= nqq7);
+    And(a= nqq7, b= g7, out= gg7);
+    
+    Mux16(a= false, b[0..9]= m7, b[10]= true, b[11..14]= false, b[15]= in[15], sel=gg7, out= o19);
+    //01001
+    aEQb5Bit(a= in[10..14],b[0]=true, b[1..2]= false, b[3]= true,  b[4]= false, out= c8);
+    And(a= c8, b= f7, out= g8);
+    Or(a= qq7, b= q8, out= qq8);
+    Not(in= qq8, out= nqq8);
+    And(a= nqq8, b= g8, out= gg8);
+    
+    Mux16(a= false, b[0..9]= m8, b[10]= true, b[11..14]= false, b[15]= in[15], sel=gg8, out= o20);
+    //01010
+    aEQb5Bit(a= in[10..14],b[0]=false, b[1]= true, b[2]= false, b[3]= true,  b[4]= false, out= c9);
+    And(a= c9, b= t33, out= g9);
+    Or(a= qq8, b= q9, out= qq9);
+    Not(in= qq9, out= nqq9);
+    And(a= nqq9, b= g9, out= gg9);
+    
+    Mux16(a= false, b[0..9]= m9, b[10]= true, b[11..14]= false, b[15]= in[15], sel=gg9, out= o21);
+
+
+
+    //00001
+    Not(in= gg0, out= d0);
+    And(a= d0, b= c0, out= dd0);
+    Not(in = r1, out= nr1);
+    And(a = dd0, b=nr1, out= ddd0);
+    Mux16(a= false, b[0..9]= in[0..9], b[10..14]= false, b[15]= in[15], sel=ddd0, out= o22);
+    //00010
+    Not(in= gg1, out= d1);
+    And(a= d1, b= c1, out= dd1);
+    And(a = dd1, b=nr1, out= ddd1);
+    Mux16(a= false, b[0..9]= m0, b[10..14]= false, b[15]= in[15], sel=ddd1, out= o23);
+    //00011
+    Not(in= gg2, out= d2);
+    And(a= d2, b= c2, out= dd2);
+    And(a = dd2, b=nr1, out= ddd2);
+    Mux16(a= false, b[0..9]= m1, b[10..14]= false, b[15]= in[15], sel=ddd2, out= o24);
+    //00100
+    Not(in= gg3, out= d3);
+    And(a= d3, b= c3, out= dd3);
+    And(a = dd3, b=nr1, out= ddd3);
+    Mux16(a= false, b[0..9]= m2, b[10..14]= false, b[15]= in[15], sel=ddd3, out= o25);
+    //00101
+    Not(in= gg4, out= d4);
+    And(a= d4, b= c4, out= dd4);
+    And(a = dd4, b=nr1, out= ddd4);
+    Mux16(a= false, b[0..9]= m3, b[10..14]= false, b[15]= in[15], sel=ddd4, out= o26);
+    //00110
+    Not(in= gg5, out= d5);
+    And(a= d5, b= c5, out= dd5);
+    And(a = dd5, b=nr1, out= ddd5);
+    Mux16(a= false, b[0..9]= m4, b[10..14]= false, b[15]= in[15], sel=ddd5, out= o27);
+    //00111
+    Not(in= gg6, out= d6);
+    And(a= d6, b= c6, out= dd6);
+    And(a = dd6, b=nr1, out= ddd6);
+    Mux16(a= false, b[0..9]= m5, b[10..14]= false, b[15]= in[15], sel=ddd6, out= o28);
+    //01000
+    Not(in= gg7, out= d7);
+    And(a= d7, b= c7, out= dd7);
+    And(a = dd7, b=nr1, out= ddd7);
+    Mux16(a= false, b[0..9]= m6, b[10..14]= false, b[15]= in[15], sel=ddd7, out= o29);
+    //01001
+    Not(in= gg8, out= d8);
+    And(a= d8, b= c8, out= dd8);
+    And(a = dd8, b=nr1, out= ddd8);
+    Mux16(a= false, b[0..9]= m7, b[10..14]= false, b[15]= in[15], sel=ddd8, out= o30);
+    
+    //calculating the result
+    Or16(a= o0, b= o1, out= l0);
+    Or16(a= l0, b= o2, out= l1);
+    Or16(a= l1, b= o3, out= l2);
+    Or16(a= l2, b= o4, out= l3);
+    Or16(a= l3, b= o5, out= l4);
+    Or16(a= l4, b= o6, out= l5);
+    Or16(a= l5, b= o7, out= l6);
+    Or16(a= l6, b= o8, out= l7);
+    Or16(a= l7, b= o9, out= l8);
+    Or16(a= l8, b= o10, out= l9);
+    Or16(a= l9, b= o11, out= l10);
+    Or16(a= l10, b= o12, out= l11);
+    Or16(a= l11, b= o13, out= l12);
+    Or16(a= l12, b= o14, out= l13);
+    Or16(a= l13, b= o15, out= l14);
+    Or16(a= l14, b= o16, out= l15);
+    Or16(a= l15, b= o17, out= l16);
+    Or16(a=	l16, b= o18, out= l17);
+    Or16(a= l17, b= o19, out= l18);
+    Or16(a= l18, b= o20, out= l19);
+    Or16(a= l19, b= o21, out= l20);
+    Or16(a= l20, b= o22, out= l21);
+    Or16(a= l21, b= o23, out= l22);
+    Or16(a= l22, b= o24, out= l23);
+    Or16(a= l23, b= o25, out= l24);
+    Or16(a= l24, b= o26, out= l25);
+    Or16(a= l25, b= o27, out= l26);
+    Or16(a= l26, b= o28, out= l27);
+    Or16(a= l27, b= o29, out= l28);
+    Or16(a= l28, b= o30, out= out);
+}

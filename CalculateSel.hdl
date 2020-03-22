@@ -1,0 +1,16 @@
+//calcualtes the difference of MaxExponent and MinExponent
+
+CHIP CalculateSel
+{
+    IN a[16], b[16]; //a is the Larger Number of those two
+    OUT out[4], t;
+
+    PARTS:
+    Exponent(in = a, out = eA);
+    Exponent(in = b, out = eB);
+    Neg5(in = eB, out = TwosC);
+    Inc5Bit(in = TwosC, out = TwosC0);
+    Add6(a[5] = false, a[0..4] = eA, b[5] = true, b[0..4] = TwosC0, out = sel0);
+    SixTOfour(in = sel0, out = out);
+    Six2one(in = sel0, out = t);
+}

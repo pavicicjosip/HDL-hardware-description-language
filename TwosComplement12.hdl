@@ -1,0 +1,24 @@
+
+CHIP TwosComplement12
+{
+    IN in[12];
+    OUT out[12];
+
+    PARTS:
+    Not(in= in[0], out= o0);
+    Not(in= in[1], out= o1);
+    Not(in= in[2], out= o2);
+    Not(in= in[3], out= o3);
+    Not(in= in[4], out= o4);
+    Not(in= in[5], out= o5);
+    Not(in= in[6], out= o6);
+    Not(in= in[7], out= o7);
+    Not(in= in[8], out= o8);
+    Not(in= in[9], out= o9);
+    Not(in= in[10], out= o10);
+    Not(in= in[11], out= o11);
+
+    Inc12Bit(in[0] = o0, in[1] = o1, in[2] = o2, in[3] = o3, in[4] = o4, in[5] = o5,
+             in[6] = o6, in[7] = o7, in[8] = o8, in[9] = o9, in[10] = o10, in[11] = o11, out= out);
+
+}

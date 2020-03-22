@@ -1,0 +1,20 @@
+// S = (a \/ ~b) /\ (~a \/ b) or (a /\ b) \/ (~a /\ ~b)
+/*  Table
+    a | b | a XNOR b
+    0 | 0 |     1
+    0 | 1 |     0
+    1 | 0 |     0
+    1 | 1 |     1
+*/
+
+CHIP XNOR
+{
+    IN a, b;
+    OUT out;
+
+    PARTS:
+    Or(a= a, b= b, out= o1);
+    Not(in= o1, out= o2);
+    And(a= a, b= b, out= o3);
+    Or(a= o2, b= o3, out= out);
+}

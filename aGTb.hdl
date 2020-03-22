@@ -1,0 +1,57 @@
+//IEEE754 half precision floating point number
+
+CHIP aGTb
+{
+    IN a[16], b[16];
+    OUT out;
+
+    PARTS:
+    XNOR(a= a[15], b= false, out= apoz);
+    XNOR(a= a[15], b= true, out= aneg);
+    XNOR(a= b[15], b= false, out= bpoz);
+    XNOR(a= b[15], b= true, out= bneg);
+
+    //if a>0, b<0 => a > b
+    And(a= apoz, b= bneg, out= o00);
+
+    aGTb5Bit(a= a[0..4], b= b[0..4], out= m2gt);
+    aGTb5Bit(a= a[5..9], b= b[5..9], out= m1gt);
+    aGTb5Bit(a= a[10..14], b= b[10..14], out= egt);
+
+    aLTb5Bit(a= a[0..4], b= b[0..4], out= m2lt);
+    aLTb5Bit(a= a[5..9], b= b[5..9], out= m1lt);
+    aLTb5Bit(a= a[10..14], b= b[10..14], out= elt);
+
+    aEQb5Bit(a= a[5..9], b= b[5..9], out= m1eq);
+    aEQb5Bit(a= a[10..14], b= b[10..14], out= eeq);
+
+    And(a= apoz, b= bneg, out = o0);
+    //a,b>0 => exponents
+    And(a= apoz, b = bpoz, out= p0);
+    And(a= p0, b= egt, out= o1);
+    //a,b<0 => exponents
+    And(a= aneg, b= bneg, out= n0);
+    And(a= n0, b= elt, out= o2);
+    //a,b>0, exponents equal => [5..9] mantisa
+    And(a= p0, b= eeq, out= t0);
+    And(a= t0, b= m1gt, out= o3);
+    //a,b<0, exponents equal => [5..9] mantisa
+    And(a= n0, b= eeq, out= t1);
+    And(a= t1, b= m1lt, out= o4);
+    //a,b>0, exponents equal, [5..9] mantisas equal => [0..4] mantisas 
+    And(a= t0, b= m1eq, out= z0);
+    And(a= z0, b= m2gt, out= o5);
+    //a,b<0, exponents equal, [5..9] mantisas equal => [0..4] mantisas
+    And(a= t1, b= m1eq, out= z1);
+    And(a= z1, b= m2lt, out= o6);
+
+    Or(a= o0, b= o1, out= r0);
+    Or(a= r0, b= o2, out= r1);
+    Or(a= r1, b= o3, out= r2);
+    Or(a= r2, b= o4, out= r3);
+    Or(a= r3, b= o5, out= r4);
+    Or(a= r4, b= o6, out= r5);
+    Or(a= r5, b= o00, out= out);
+        
+
+}

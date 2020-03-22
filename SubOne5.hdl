@@ -1,0 +1,12 @@
+//Subtracts one from a given number
+
+CHIP SubOne5
+{
+    IN in[5];
+    OUT out[5];
+
+    PARTS:
+    Add6(a[0..4]=in, a[5]= false,b[0..5]=true, out[0..4]= out);
+
+
+}

@@ -1,0 +1,233 @@
+
+CHIP AddEqualSignFPN
+{
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+    //*********************** IF BOTH EXP == 00000 ***********************
+    aEQb5Bit(a= a[10..14], b= false, out= p0);
+    //p0 = 1 -> Exponent of a is 00000, p0 = 0 -> Exponent of a is != 00000
+    aEQb5Bit(a= b[10..14], b= false, out= p1);
+    //p1 = 1 -> Exponent of b is 00000, p1 = 0 -> Exponent of b is != 00000
+    And(a= p0, b= p1, out= p2);
+    //p2 = 1 -> both exponents are 00000, else != 00000
+    DMux(in= true, sel= p2, a= z0, b= z1);
+    //z0= 1 -> check if exp a == exp b == 11111
+    //z1= 1 -> a exponent = b exponenet = 00000
+    AddSubnormalNumbers(a= a, b = b, out = k0);
+    Mux16(a= false, b= k0, sel= z1, out= o0);
+    //o0 is the solution if both exponents are 00000
+
+    //*********************** IF BOTH EXP == 11111 ***********************
+    aEQb5Bit(a= a[10..14], b= true, out= p3);
+    //p3 = 1 -> Exponent of a is 11111, p3 = 0 -> Exponent of a is != 11111
+    aEQb5Bit(a= b[10..14], b= true, out= p4);
+    //p4 = 1 -> Exponent of b is 11111, p4 = 0 -> Exponent of b is != 11111
+    Or(a= p3, b= p4, out= p5);
+    //p5 = 1 -> atleast one of exponents is 11111, else != 11111
+    DMux(in= z0, sel= p5, a= z2, b= z3);
+    //z2= 1 -> subtract max exp - min exp
+    //z3= 1 -> a exponent = b exponenet = 11111
+    Mux16(a= false, b[0..9]= false, b[10..14]= true, b[15]= false, sel= z3, out= o1);
+    //o1 is the solution if both exponents are 00000, unknown coz inf + inf
+
+    //*********************** a_exp == 00001 AND b_exp == 00000 ***********************
+    Max(a= a, b= b, out = max0);
+    //max0 FPN with the bigger exponent
+    Min(a = a, b= b, out = min0);
+    //min0 FPN with the lower exponent
+
+    Exponent(in= max0, out = emax);
+    Exponent(in= min0, out = emin);
+
+    aEQb5Bit(a= emax, b[0]= true, b[1..4]= false, out= p7);
+    //p7 = 1 -> Exponent of a is 00001, p7 = 0 -> Exponent of a is != 00001
+    aEQb5Bit(a= emin, b= false, out= p8);
+    //p8 = 1 -> Exponent of a is 00000, p8 = 0 -> Exponent of a is != 00000
+    And(a= p7, b= p8, out= p9);
+    //p8 = 1 -> both exponents are 00001 and 00000, else != 00000
+    DMux(in= z2, sel= p9, a= z4, b= z5);
+    //z4= 1 -> check if exp a == exp b == 11111
+    //z5= 1 -> a exponent = 00001, b exponenet = 00000
+    AddShifted(a= max0, b = min0, out = k100);
+    Mux16(a= false, b= k100, sel= z5, out= o13);
+    //o0 is the solution if both exponents are 00000
+
+    //*********************** ELSE ***********************
+    CalculateSel(a= max0, b= min0, out= sel, t= uu);
+    Not(in= p8, out= np8);
+    And(a = np8, b = z4, out = z6);
+    DMux16Way(in= z6, sel= sel,a= ta, b= ts, c= td, d= tf, e= tg, f= th, g= tj, 
+              h= tk, i= tl, j= tm, k= tn, l= t11, m= t12, n= t13, o= t14, p= t15);
+
+    And(a= ta, b= uu, out= t0);
+    And(a= ts, b= uu, out= t1);
+    And(a= td, b= uu, out= t2);
+    And(a= tf, b= uu, out= t3);
+    And(a= tg, b= uu, out= t4);
+    And(a= th, b= uu, out= t5);
+    And(a= tj, b= uu, out= t6);
+    And(a= tk, b= uu, out= t7);
+    And(a= tl, b= uu, out= t8);
+    And(a= tm, b= uu, out= t9);
+    And(a= tn, b= uu, out= t10);
+    
+    //t0 == 1 -> a exp - b exp = 0
+    AddEqualExponents(a= max0, b= min0, out = k1);
+    Mux16(a= false, b= k1, sel= t0, out= o2);
+    //o2 is the solution if a exp == b exp
+    //t1 == 1 -> a exp - b exp = 1
+    Exponent(in = min0, out= e0);
+    aEQb5Bit(a = e0, b = false, out= p6);
+    ShiftRightInsertOne(in= min0, out= d0);
+    ShiftRightInsertZero(in= min0, out= d1);
+    //if p6= 0 -> normal number, p6= 1 subnormal number
+    Mux16(a= d0, b= d1, sel= p6, out= min1);
+    AddShifted(a= max0, b= min1, out= k00);
+    Mux16(a= false , b= k00, sel= t1, out= o3);
+    //t2 == 1 -> a exp - b exp = 2
+    ShiftRightInsertZero(in= min1, out= min2);
+    AddShifted(a= max0, b= min2, out= k2);
+    Mux16(a= false, b= k2, sel= t2, out= o4);
+    //t3 == 1 -> a exp - b exp = 3
+    ShiftRightInsertZero(in= min2, out= min3);
+    AddShifted(a= max0, b= min3, out= k3);
+    Mux16(a= false, b= k3, sel= t3, out= o5);
+    //t4 == 1 -> a exp - b exp = 4
+    ShiftRightInsertZero(in= min3, out= min4);
+    AddShifted(a= max0, b= min4, out= k4);
+    Mux16(a= false, b= k4, sel= t4, out= o6);
+    //t5 == 1 -> a exp - b exp = 5
+    ShiftRightInsertZero(in= min4, out= min5);
+    AddShifted(a= max0, b= min5, out= k5);
+    Mux16(a= false, b= k5, sel= t5, out= o7);
+    //t6 == 1 -> a exp - b exp = 6
+    ShiftRightInsertZero(in= min5, out= min6);
+    AddShifted(a= max0, b= min6, out= k6);
+    Mux16(a= false, b= k6, sel= t6, out= o8);
+    //t7 == 1 -> a exp - b exp = 7
+    ShiftRightInsertZero(in= min6, out= min7);
+    AddShifted(a= max0, b= min7, out= k7);
+    Mux16(a= false, b= k7, sel= t7, out= o9);
+    //t8 == 1 -> a exp - b exp = 8
+    ShiftRightInsertZero(in= min7, out= min8);
+    AddShifted(a= max0, b= min8, out= k8);
+    Mux16(a= false, b= k8, sel= t8, out= o10);
+    //t9 == 1 -> a exp - b exp = 9
+    ShiftRightInsertZero(in= min8, out= min9);
+    AddShifted(a= max0, b= min9, out= k9);
+    Mux16(a= false, b= k9, sel= t9, out= o11);
+    //t10 == 1 -> a exp - b exp = 10
+    ShiftRightInsertZero(in= min9, out= min10);
+    AddShifted(a= max0, b= min10, out= k10);
+    Mux16(a= false, b= k10, sel= t10, out= o12);
+
+    //IF a_exp == 00010, b_exp==00000
+    aEQb5Bit(a= emax, b[0]= false, b[1]= true, b[2]= false, b[3]= false, b[4]= false, out= y0);
+    aEQb5Bit(a= emin, b= false, out = y1);
+    And(a= y0, b = y1, out= h0);
+    AddShifted(a= max0, b= d1, out= k14);
+    Mux16(a= false, b= k14, sel= h0, out= o14);
+    //IF a_exp == 00011, b_exp==00000
+    aEQb5Bit(a= emax, b[0]= true, b[1]= true, b[2]= false, b[3]= false, b[4]= false, out= y2);
+    And(a= y2, b = y1, out= h1);
+    ShiftRightInsertZero(in = d1, out= d2);
+    AddShifted(a= max0, b= d2, out= k15);
+    Mux16(a= false, b= k15, sel= h1, out= o15);
+    //IF a_exp == 00100, b_exp==00000
+    aEQb5Bit(a= emax, b[0]= false, b[1]= false, b[2]= true, b[3]= false, b[4]= false, out= y3);
+    And(a= y3, b = y1, out= h2);
+    ShiftRightInsertZero(in = d2, out= d3);
+    AddShifted(a= max0, b= d3, out= k16);
+    Mux16(a= false, b= k16, sel= h2, out= o16);
+    //IF a_exp == 00101, b_exp==00000
+    aEQb5Bit(a= emax, b[0]= true, b[1]= false, b[2]= true, b[3]= false, b[4]= false, out= y4);
+    And(a= y4, b = y1, out= h3);
+    ShiftRightInsertZero(in = d3, out= d4);
+    AddShifted(a= max0, b= d4, out= k17);
+    Mux16(a= false, b= k17, sel= h3, out= o17);
+    //IF a_exp == 00110, b_exp==00000
+    aEQb5Bit(a= emax, b[0]= false, b[1]= true, b[2]= true, b[3]= false, b[4]= false, out= y5);
+    And(a= y5, b = y1, out= h4);
+    ShiftRightInsertZero(in = d4, out= d5);
+    AddShifted(a= max0, b= d5, out= k18);
+    Mux16(a= false, b= k18, sel= h4, out= o18);
+    //IF a_exp == 00111, b_exp==00000
+    aEQb5Bit(a= emax, b[0]= true, b[1]= true, b[2]= true, b[3]= false, b[4]= false, out= y6);
+    And(a= y6, b = y1, out= h5);
+    ShiftRightInsertZero(in = d5, out= d6);
+    AddShifted(a= max0, b= d6, out= k19);
+    Mux16(a= false, b= k19, sel= h5, out= o19);
+    //IF a_exp == 01000, b_exp==00000
+    aEQb5Bit(a= emax, b[0]= false, b[1]= false, b[2]= false, b[3]= true, b[4]= false, out= y7);
+    And(a= y7, b = y1, out= h6);
+    ShiftRightInsertZero(in = d6, out= d7);
+    AddShifted(a= max0, b= d7, out= k20);
+    Mux16(a= false, b= k20, sel= h6, out= o20);
+    //IF a_exp == 01001, b_exp==00000
+    aEQb5Bit(a= emax, b[0]= true, b[1]= false, b[2]= false, b[3]= true, b[4]= false, out= y8);
+    And(a= y8, b = y1, out= h7);
+    ShiftRightInsertZero(in = d7, out= d8);
+    AddShifted(a= max0, b= d8, out= k21);
+    Mux16(a= false, b= k21, sel= h7, out= o21);
+    //IF a_exp == 01010, b_exp==00000
+    aEQb5Bit(a= emax, b[0]= false, b[1]= true, b[2]= false, b[3]= true, b[4]= false, out= y9);
+    And(a= y9, b = y1, out= h8);
+    ShiftRightInsertZero(in = d8, out= d9);
+    AddShifted(a= max0, b= d9, out= k22);
+    Mux16(a= false, b= k22, sel= h8, out= o22);
+
+
+    
+    //calculate the final result
+    Or16(a= o0, b= o1, out= r0);
+    Or16(a= o2, b= r0, out= r1);
+    Or16(a= o3, b= r1, out= r2);
+    Or16(a= o4, b= r2, out= r3);
+    Or16(a= o5, b= r3, out= r4);
+    Or16(a= o6, b= r4, out= r5);
+    Or16(a= o7, b= r5, out= r6);
+    Or16(a= o8, b= r6, out= r7);
+    Or16(a= o9, b= r7, out= r8);
+    Or16(a= o10, b= r8, out= r9);
+    Or16(a= o11, b= r9, out= r10);
+    Or16(a= o12, b= r10, out= r11);
+    Or16(a= o13, b= r11, out= r12);
+    Or16(a= o14, b= r12, out= r13);
+    Or16(a= o15, b= r13, out= r14);
+    Or16(a= o16, b= r14, out= r15);
+    Or16(a= o17, b= r15, out= r16);
+    Or16(a= o18, b= r16, out= r17);
+    Or16(a= o19, b= r17, out= r18);
+    Or16(a= o20, b= r18, out= r19);
+    Or16(a= o21, b= r19, out= r20);
+    Or16(a= o22, b= r20, out= r21);
+
+    Or(a= z1, b= z3, out= v0);
+    Or(a= v0, b= t0, out= v1);
+    Or(a= v1, b= t1, out= v2);
+    Or(a= v2, b= t2, out= v3);
+    Or(a= v3, b= t3, out= v4);
+    Or(a= v4, b= t4, out= v5);
+    Or(a= v5, b= t5, out= v6);
+    Or(a= v6, b= t6, out= v7);
+    Or(a= v7, b= t7, out= v8);
+    Or(a= v8, b= t8, out= v9);
+    Or(a= v9, b= t9, out= v10);
+    Or(a= v10, b= t10, out= v11);
+    Or(a = z5, b = v11, out = v12);
+    Or(a= v12, b= h0, out= v13);
+    Or(a= v13, b= h1, out= v14);
+    Or(a= v14, b= h2, out= v15);
+    Or(a= v15, b= h3, out= v16);
+    Or(a= v16, b= h4, out= v17);
+    Or(a= v17, b= h5, out= v18);
+    Or(a= v18, b= h6, out= v19);
+    Or(a= v19, b= h7, out= v20);
+    Or(a= v20, b= h8, out= v21);
+    
+    //if v11= 1 -> r11 is the solution, else max0 is
+    Mux16(a= max0, b= r21, sel= v21, out= out);
+
+}

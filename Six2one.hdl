@@ -1,0 +1,9 @@
+
+CHIP Six2one
+{
+    IN in[6];
+    OUT out;
+
+    PARTS:
+    Not(in= in[4], out= out);
+}

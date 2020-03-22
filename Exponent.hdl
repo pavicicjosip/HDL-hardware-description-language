@@ -1,0 +1,15 @@
+//takes the exponent part of the IEEE-754 floating point 16bit
+//e.g. in = 0 10101 0000101010 -> out = 10101
+
+CHIP Exponent
+{
+    IN in[16];
+    OUT out[5];
+
+    PARTS:    
+    Or(a= in[10] , b= false, out= out[0]);
+    Or(a= in[11] , b= false, out= out[1]);
+    Or(a= in[12] , b= false, out= out[2]);
+    Or(a= in[13] , b= false, out= out[3]);
+    Or(a= in[14] , b= false, out= out[4]);
+}

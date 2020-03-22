@@ -1,0 +1,12 @@
+
+CHIP AddSubFPN
+{
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+    AddEqualSignFPN(a= a, b= b, out= o0);
+    SubFPN(a= a, b=b, out= o1);
+    Xor(a= a[15], b= b[15], out= t0);
+    Mux16(a= o0, b= o1, sel= t0, out= out);
+}

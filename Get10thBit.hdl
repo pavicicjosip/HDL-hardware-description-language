@@ -1,0 +1,9 @@
+
+CHIP Get10thBit
+{
+    IN in[10];
+    OUT out;
+
+    PARTS:
+    Or(a= in[9], b= false, out= out);
+}

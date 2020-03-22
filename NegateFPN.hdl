@@ -1,0 +1,10 @@
+
+CHIP NegateFPN
+{
+    IN in[16];
+    OUT out[16];
+
+    PARTS:
+    Not(in = in[15], out = negIn);
+    Or16(a[0..15]= false, b[0..14]= in[0..14], b[15] = negIn, out= out);
+}

@@ -1,0 +1,20 @@
+// if (a == b) then out = 1 else out = 0
+
+CHIP aEQb5Bit
+{
+    IN a[5], b[5];
+    OUT out;
+
+    PARTS:
+    //Comparison of every bit respectively of the index
+    XNOR(a = a[0], b = b[0], out = o0);
+    XNOR(a = a[1], b = b[1], out = o1);
+    XNOR(a = a[2], b = b[2], out = o2);
+    XNOR(a = a[3], b = b[3], out = o3);
+    XNOR(a = a[4], b = b[4], out = o4);
+    //if (o0 /\ o1 /\ o2 /\ o3 /\ o4) == 1 then a == b else a != b
+    And(a= o0, b= o1, out= r0);
+    And(a= r0, b= o2, out= r1);
+    And(a= r1, b= o3, out= r2);
+    And(a= r2, b= o4, out= out); 
+}

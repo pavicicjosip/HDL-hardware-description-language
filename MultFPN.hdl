@@ -1,0 +1,21 @@
+
+CHIP MultFPN
+{
+    IN a[16], b[16];
+    OUT out[16];
+
+    PARTS:
+    //sign
+    Xor(a= a[15], b= b[15], out= sign);
+
+    //exponent
+    Exponent(in= a, out= ea);
+    Exponent(in= b, out= eb);
+    Add6(a[0..4]= ea, a[5]= false, b[0..4]= eb, b[5]= false, out= exp);
+    Six2OneMult(in= exp, out= bit);
+    Not(in= bit, out= nbit);
+
+    
+
+
+}

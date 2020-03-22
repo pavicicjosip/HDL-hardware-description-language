@@ -1,0 +1,24 @@
+
+CHIP Counterbalance
+{
+    IN a[16], b[16];
+    OUT o0[16], o1[16], sign;
+    
+    PARTS:
+    Max(a= a, b= b, out= max);
+    Min(a= a, b= b, out= min);
+    Exponent(in= max, out= emax);
+    Exponent(in= min, out= emin);
+
+    CalculateSel(a= max, b=min, out= sel, t= t00);
+    
+    DMux16Way(in= true, sel= sel, a= ta, b= tb, c= tc, d= td, e= te, f= tf, g= tg,
+    h= th, i= ti, j= tj, k= tk, l= tl, m= tm, n= tn, o= to, p= tp);
+
+    //00000
+    And(a= ta, b= t00, out= t0);
+    Mux16(a= false, b= b, sel= t0, out= o0);
+    //00001
+    aEQb5Bit(a[])
+
+}

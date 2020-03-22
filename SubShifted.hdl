@@ -1,0 +1,25 @@
+
+CHIP SubShifted
+{
+    IN a[16], b[16]; // a_exp > b_exp
+    OUT out[16];
+
+    PARTS:
+    //a poz, b neg
+    TwosComplement12(in[0..9]= b[0..9], in[10]= false, in[11]= false, out= tc0);
+    Add11sign(a[0..9]= a[0..9], a[10]= true, b= tc0, out= m0, bit= bit0, sign = s);
+
+    Normalize(in[0..9]= m0, in[10..14]= a[10..14], in[15]= s, sel = bit0, out= z1);
+
+
+    //a neg, b poz
+    TwosComplement12(in[0..9]= a[0..9], in[10]= true, in[11]= false, out= tc2);
+    Add11sign(a[0..9]= b[0..9], a[10]= false, b= tc2, out= m2, bit= bit2, sign = s1);
+    //|a| < |b| ->the result is negative
+    TwosComplement12(in[0..9]= m2, in[10]= bit2, in[11]= s1, out = tc3);
+    MantisaBit(in= tc3, out= m3, bit=bit3);
+    Normalize(in[0..9]= m3, in[10..14]= a[10..14], in[15]= s1, sel = bit3, out= z4);
+
+    Mux16(a=z1, b= z4, sel= a[15], out= out);
+
+}

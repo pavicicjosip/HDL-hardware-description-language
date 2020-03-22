@@ -1,0 +1,14 @@
+//adds 1 to an input
+//e.g. in = 11010 -> out = 11011
+
+CHIP Inc5Bit {
+    IN in[5];
+    OUT out[5];
+
+    PARTS:
+    HalfAdder(a= in[0], b= true, sum= out[0], carry= c0);
+    FullAdder(a= in[1], b= false, c= c0, sum= out[1], carry= c1);
+    FullAdder(a= in[2], b= false, c= c1, sum= out[2], carry= c2);
+    FullAdder(a= in[3], b= false, c= c2, sum= out[3], carry= c3);
+    FullAdder(a= in[4], b= false, c= c3, sum= out[4], carry= c4);
+}

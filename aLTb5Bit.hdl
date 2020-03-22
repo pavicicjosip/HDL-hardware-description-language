@@ -1,0 +1,14 @@
+//if( not EQ and not GT) then LT
+
+CHIP aLTb5Bit
+{
+    IN a[5], b[5];
+    OUT out;
+
+    PARTS:
+    aEQb5Bit(a = a, b = b, out = eq);
+    aGTb5Bit(a = a, b= b, out = gt);
+    Not(in= eq, out= Neq);
+    Not(in= gt, out= Ngt);
+    And(a= Ngt, b= Neq, out= out);
+}

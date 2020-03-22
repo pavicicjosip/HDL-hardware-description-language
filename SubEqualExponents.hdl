@@ -1,0 +1,20 @@
+
+CHIP SubEqualExponents
+{
+    IN a[16],b[16]; //a > 0, b < 0
+    OUT out[16];
+
+    PARTS:
+    //if |a| > |b| ->the result is pozitive
+    TwosComplement12(in[0..9]= b[0..9], in[10]= true, in[11]= false, out= tc0);
+    Add11sign(a[0..9]= a[0..9], a[10]= true, b= tc0, out= m0, bit= bit0, sign = s);
+    //if |a| < |b| ->the result is negative
+    TwosComplement12(in[0..9]= m0, in[10]= bit0, in[11]= s, out = tc1);
+    MantisaBit(in= tc1, out= m1, bit=bit1);
+
+    Normalize(in[0..9]= m0, in[10..14]= a[10..14], in[15]= s, sel = bit0, out= z1);
+    Normalize(in[0..9]= m1, in[10..14]= a[10..14], in[15]= s, sel = bit1, out= z2);
+
+    Mux16(a= z1, b= z2, sel= s, out= out);
+
+}
